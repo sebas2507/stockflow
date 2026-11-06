@@ -12,12 +12,13 @@ export interface Producto {
 }
 
 export type TipoMovimiento = "ENTRADA" | "SALIDA";
+export type EstadoSolicitud = "PENDIENTE" | "APROBADA" | "RECHAZADA";
 
 export interface SolicitudReabastecimiento {
   id: number;
   producto_id: number;
   cantidad: number;
-  estado: "PENDIENTE" | "APROBADA" | "RECHAZADA";
+  estado: EstadoSolicitud;
   comentario: string | null;
   creada_en: string;          // las fechas llegan en JSON como texto (ISO 8601)
   resuelta_en: string | null;

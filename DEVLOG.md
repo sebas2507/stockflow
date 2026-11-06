@@ -47,6 +47,13 @@
 - Validación en el cliente (UX) + mensajes de error del backend (409, 422).
 - Botón deshabilitado durante el envío (evita doble registro). Recarga de datos desde la API tras cada movimiento.
 
+## Sesion 9
+- bandeja de aprobación (human-in-the-loop) con aprobar/rechazar y comentario.
+- Botón "Revisar inventario" que usa el endpoint batch.
+- Refactor: pantallas en pages/, App solo con navegación por pestañas.
+- Helper genérico postJson<T> para todas las peticiones POST (DRY).
+- Promise.all + Map para unir solicitudes con productos.
+
 
 ### Problemas encontrados
 - La terminal de Windows se "congelaba" al hacer clic sobre ella (modo selección), y eso pausaba la API. Se sale con Esc.

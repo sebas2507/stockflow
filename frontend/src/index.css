@@ -46,3 +46,23 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .secundario-btn { background: white; color: #0f766e; border: 1px solid #0f766e; }
 
 .exito { background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; }
+
+.encabezado { display: flex; justify-content: space-between; align-items: flex-end;
+              flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.encabezado .subtitulo { margin: 0; }
+
+.pestanas { display: flex; gap: 4px; background: #e5e7eb; padding: 4px; border-radius: 8px; }
+.pestanas button { background: transparent; color: #4b5563; }
+.pestanas button.activa { background: white; color: #0f766e; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
+
+.barra { display: flex; justify-content: space-between; align-items: flex-end;
+         flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+.barra label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #4b5563; }
+
+.lista { display: flex; flex-direction: column; gap: 12px; }
+.solicitud-cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.solicitud h3 { margin: 0; font-size: 17px; }
+.solicitud p { margin: 8px 0; }
+.comentario { width: 100%; box-sizing: border-box; margin-bottom: 12px; }
+
+.peligro-btn { background: white; color: #b91c1c; border: 1px solid #b91c1c; }
