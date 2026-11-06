@@ -13,6 +13,14 @@ class ProductoCrear(BaseModel):
     stock: int = Field(ge=0)           # ge = "greater or equal": no se aceptan negativos
     minimo: int = Field(ge=0)
 
+# Calcula el estado a partir de los datos, igual que la columna del Excel
+def calcular_estado(stock: int, minimo: int) -> str:
+    if stock == 0:
+        return "AGOTADO"
+    if stock < minimo:
+        return "STOCK BAJO"
+    return "OK"
+
 productos = [
     {"id": 1, "codigo": "7501206626610", "nombre": "Tape eléctrico negro", "familia": "ferreteria", "subcategoria": "Cintas", "stock": 20, "minimo": 10},
     {"id": 2, "codigo": "7501206661741", "nombre": "Regleta económica", "familia": "ferreteria", "subcategoria": "Electricidad", "stock": 7, "minimo": 10},
@@ -29,10 +37,21 @@ productos = [
 def health():
     return {"status": "ok"}
 
-#Listar todos los productos
-@app.get("/productos")
-def listar_productos():
-    return productos
+# Lista productos. "familia" y "estado" son query parameters opcionales:
+@app.get("/products")
+def listar_productos(familia: str | None = None, estado: str | None = None):
+    resultado = []
+    for p in productos:
+        # Copia el producto y le agrega el estado calculado (sin modificar el original)
+        item = {**p, "estado": calcular_estado(p["stock"], p["minimo"])}
+
+        if familia and item["familia"] != familia.lower():
+            continue   # no coincide con la familia: se salta
+        if estado and item["estado"] != estado.upper():
+            continue   # no coincide con el estado: se salta
+
+        resultado.append(item)
+    return resultado
 
 # Devuelve un producto por su id. {product_id} es un "path parameter".
 @app.get("/products/{product_id}")
