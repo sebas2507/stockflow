@@ -15,3 +15,11 @@
 - Código separado en database, models, schemas, seed y main (separación de responsabilidades).
 - Relación familias → productos con llave foránea. JOIN + contains_eager para evitar N+1.
 - Seed idempotente. Los datos persisten al reiniciar la API.
+
+
+
+
+
+
+### Problemas encontrados
+- La terminal de Windows se "congelaba" al hacer clic sobre ella (modo selección), y eso pausaba la API. Se sale con Esc.
