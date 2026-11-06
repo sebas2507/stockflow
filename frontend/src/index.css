@@ -29,3 +29,20 @@ th { background: #f9fafb; font-size: 12px; text-transform: uppercase; color: #6b
 
 .error { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; }
 .vacio { color: #6b7280; padding: 24px; text-align: center; background: white; border-radius: 8px; }
+
+.panel { background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px;
+         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
+.panel h2 { margin: 0 0 4px; font-size: 18px; }
+
+.campos { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; }
+.campos label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #4b5563; }
+.campos .ancho { flex: 1; min-width: 220px; }
+input { padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font: inherit; }
+
+.acciones { display: flex; justify-content: flex-end; gap: 8px; }
+button { padding: 8px 14px; border: none; border-radius: 6px; background: #0f766e;
+         color: white; font: inherit; font-weight: 600; cursor: pointer; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+.secundario-btn { background: white; color: #0f766e; border: 1px solid #0f766e; }
+
+.exito { background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; }

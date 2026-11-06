@@ -10,3 +10,21 @@ export interface Producto {
   minimo: number;
   estado: "OK" | "STOCK BAJO" | "AGOTADO";   // solo acepta estos tres valores
 }
+
+export type TipoMovimiento = "ENTRADA" | "SALIDA";
+
+export interface SolicitudReabastecimiento {
+  id: number;
+  producto_id: number;
+  cantidad: number;
+  estado: "PENDIENTE" | "APROBADA" | "RECHAZADA";
+  comentario: string | null;
+  creada_en: string;          // las fechas llegan en JSON como texto (ISO 8601)
+  resuelta_en: string | null;
+}
+
+// Lo que responde POST /products/{id}/movements (MovimientoResultado en schemas.py)
+export interface MovimientoResultado {
+  stock_actual: number;
+  solicitud_generada: SolicitudReabastecimiento | null;
+}

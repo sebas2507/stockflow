@@ -42,6 +42,11 @@
 - Cleanup en useEffect para descartar respuestas viejas (condición de carrera).
 - Estilos con badges de color + texto (accesibilidad).
 
+## Sesion 8
+- formulario para registrar movimientos (entrada/salida).
+- Validación en el cliente (UX) + mensajes de error del backend (409, 422).
+- Botón deshabilitado durante el envío (evita doble registro). Recarga de datos desde la API tras cada movimiento.
+
 
 ### Problemas encontrados
 - La terminal de Windows se "congelaba" al hacer clic sobre ella (modo selección), y eso pausaba la API. Se sale con Esc.

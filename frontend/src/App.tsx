@@ -3,6 +3,7 @@ import type { Producto } from "./types";
 import { obtenerProductos } from "./api";
 import { Filtros } from "./components/Filtros";
 import { ProductTable } from "./components/ProductTable";
+import { MovimientoForm } from "./components/MovimientoForm";
 
 function App() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -12,6 +13,9 @@ function App() {
   // Estado de los filtros: vive en App porque lo usan Filtros Y la consulta
   const [familia, setFamilia] = useState("");
   const [estado, setEstado] = useState("");
+  const [seleccionado, setSeleccionado] = useState<Producto | null>(null);
+  const [mensaje, setMensaje] = useState<string | null>(null);
+  const [recargar, setRecargar] = useState(0);   // contador: al cambiar, vuelve a consultar
 
   // Se ejecuta al inicio Y cada vez que cambia familia o estado
   useEffect(() => {
@@ -35,7 +39,13 @@ function App() {
     return () => {
       ignorar = true;
     };
-  }, [familia, estado]);
+  }, [familia, estado, recargar]);
+
+  function manejarRegistrado(texto: string) {
+  setMensaje(texto);
+  setSeleccionado(null);          // cierra el formulario
+  setRecargar((n) => n + 1);      // vuelve a pedir los productos a la API
+}
 
   return (
     <main>
@@ -49,8 +59,29 @@ function App() {
         onEstadoChange={setEstado}
       />
 
+            {mensaje && <p className="exito">{mensaje}</p>}
       {error && <p className="error">No se pudo conectar con la API: {error}</p>}
-      {cargando ? <p>Cargando productos...</p> : <ProductTable productos={productos} />}
+
+      {seleccionado && (
+        <MovimientoForm
+          key={seleccionado.id}
+          producto={seleccionado}
+          onCancelar={() => setSeleccionado(null)}
+          onRegistrado={manejarRegistrado}
+        />
+      )}
+
+      {cargando ? (
+        <p>Cargando productos...</p>
+      ) : (
+        <ProductTable
+          productos={productos}
+          onMovimiento={(p) => {
+            setSeleccionado(p);
+            setMensaje(null);
+          }}
+        />
+      )}
     </main>
   );
 }

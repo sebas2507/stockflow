@@ -3,9 +3,10 @@ import { EstadoBadge } from "./EstadoBadge";
 
 type Props = {
   productos: Producto[];
+  onMovimiento: (producto: Producto) => void;
 };
 
-export function ProductTable({ productos }: Props) {
+export function ProductTable({ productos, onMovimiento }: Props) {
   if (productos.length === 0) {
     return <p className="vacio">No hay productos con esos filtros.</p>;
   }
@@ -19,6 +20,7 @@ export function ProductTable({ productos }: Props) {
           <th className="numero">Stock</th>
           <th className="numero">Mínimo</th>
           <th>Estado</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -32,6 +34,11 @@ export function ProductTable({ productos }: Props) {
             <td className="numero">{p.stock}</td>
             <td className="numero">{p.minimo}</td>
             <td><EstadoBadge estado={p.estado} /></td>
+            <td>
+                    <button className="secundario-btn" onClick={() => onMovimiento(p)}>
+                        Movimiento
+                    </button>
+                </td>
           </tr>
         ))}
       </tbody>
