@@ -1,6 +1,17 @@
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 app = FastAPI(title="StockFlow API")
+
+# este es el esquema  de entrada: lo que el cliente debe enviar para crear un producto.
+# No incluye "id" porque lo genera el sistema, no el cliente.
+class ProductoCrear(BaseModel):
+    codigo: str | None = None          # opcional: hay productos sin código en el Excel
+    nombre: str = Field(min_length=1)  # no puede venir vacío
+    familia: str
+    subcategoria: str
+    stock: int = Field(ge=0)           # ge = "greater or equal": no se aceptan negativos
+    minimo: int = Field(ge=0)
 
 productos = [
     {"id": 1, "codigo": "7501206626610", "nombre": "Tape eléctrico negro", "familia": "ferreteria", "subcategoria": "Cintas", "stock": 20, "minimo": 10},
@@ -31,4 +42,12 @@ def obtener_producto(product_id: int):
             return p
     # Si no se encuentra, responde con el código 404 (Not Found).
     raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+# Crea un producto. status_code=201 significa "Created".
+@app.post("/products", status_code=201)
+def crear_producto(datos: ProductoCrear):
+    nuevo_id = max(p["id"] for p in productos) + 1   # siguiente id disponible
+    nuevo = {"id": nuevo_id, **datos.model_dump()}    # une el id con los datos recibidos
+    productos.append(nuevo)
+    return nuevo
 
