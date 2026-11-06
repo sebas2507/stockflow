@@ -12,12 +12,24 @@
 ## Sesión 2 
 - PostgreSQL 17 en Docker con docker-compose y volumen persistente.
 - Credenciales en .env y .env.example como plantilla.
+
+## Sesion 3
+- API conectada a PostgreSQL con SQLAlchemy 2.0 (ORM) y psycopg.
 - Código separado en database, models, schemas, seed y main (separación de responsabilidades).
 - Relación familias → productos con llave foránea. JOIN + contains_eager para evitar N+1.
 - Seed idempotente. Los datos persisten al reiniciar la API.
 
+## Sesion 4 
+- Movimientos de stock (ENTRADA/SALIDA) como historial de auditoría. El stock no se edita directo.
+- Solicitudes de reabastecimiento automáticas al quedar bajo el mínimo (cantidad = doble del mínimo − stock), sin duplicados.
+- Flujo human-in-the-loop: PENDIENTE → APROBADA / RECHAZADA (rechazo con comentario obligatorio).
+- Capa de servicios separada de los endpoints. Excepciones propias traducidas a 404/409 con exception handlers.
+- Bloqueo de fila (SELECT ... FOR UPDATE) para evitar condiciones de carrera.
 
-
+## Sesion 5 
+- Pruebas unitarias de las reglas de negocio con parametrize y casos límite.
+- Pruebas de integración de la API con TestClient y una base de datos de prueba aislada (dependency_overrides).
+- Endpoint de generación masiva de solicitudes desarrollado con TDD (rojo → verde → refactor).
 
 
 

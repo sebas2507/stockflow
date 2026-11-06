@@ -10,6 +10,7 @@ from app.schemas import (ProductoCrear, ProductoRespuesta, MovimientoCrear,
                          MovimientoRespuesta, MovimientoResultado,
                          SolicitudRespuesta, Aprobacion, Rechazo)
 from app.services import (calcular_estado, registrar_movimiento, resolver_solicitud,
+                          generar_solicitudes_pendientes,
                           NoEncontradoError, ConflictoError)
 
 app = FastAPI(title="StockFlow API")
@@ -114,6 +115,12 @@ def listar_solicitudes(estado: EstadoSolicitud | None = None,
     if estado:
         consulta = consulta.where(SolicitudReabastecimiento.estado == estado)
     return db.scalars(consulta).all()
+
+# Revisa todo el inventario y crea las solicitudes que falten.
+# Pensado para ejecutarse automáticamente (por ejemplo, cada mañana).
+@app.post("/restock-requests/generate", response_model=list[SolicitudRespuesta])
+def generar_solicitudes(db: Session = Depends(get_db)):
+    return generar_solicitudes_pendientes(db)
 
 
 @app.post("/restock-requests/{solicitud_id}/approve", response_model=SolicitudRespuesta)

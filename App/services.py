@@ -94,3 +94,17 @@ def resolver_solicitud(db: Session, solicitud_id: int, aprobar: bool,
     db.commit()
     db.refresh(solicitud)
     return solicitud
+
+def generar_solicitudes_pendientes(db: Session) -> list[SolicitudReabastecimiento]:
+    productos = db.scalars(select(Producto)).all()   # 1. todos los productos
+
+    creadas = []
+    for producto in productos:                        # 2. revisa cada uno
+        solicitud = _generar_solicitud_si_hace_falta(db, producto)
+        if solicitud is not None:                     # 3. solo las nuevas
+            creadas.append(solicitud)
+
+    db.commit()                                       # 4. una sola transacción
+    for solicitud in creadas:
+        db.refresh(solicitud)                         # carga id y creada_en
+    return creadas                                    # 5.
