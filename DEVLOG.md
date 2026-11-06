@@ -31,6 +31,11 @@
 - Pruebas de integración de la API con TestClient y una base de datos de prueba aislada (dependency_overrides).
 - Endpoint de generación masiva de solicitudes desarrollado con TDD (rojo → verde → refactor).
 
+## Sesion 6 – Frontend 
+- Proyecto React + TypeScript con Vite en /frontend.
+- CORS en FastAPI restringido al origen del frontend.
+- Tipos en TypeScript que reflejan el schema de la API.
+- Lista de productos con useState/useEffect y estados de carga y error.
 
 
 ### Problemas encontrados

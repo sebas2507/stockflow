@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session, contains_eager
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import get_db
 from app.models import (Producto, Familia, MovimientoStock,
@@ -14,6 +15,13 @@ from app.services import (calcular_estado, registrar_movimiento, resolver_solici
                           NoEncontradoError, ConflictoError)
 
 app = FastAPI(title="StockFlow API")
+# Permite que SOLO el frontend de desarrollo consuma la API desde el navegador
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Traducen los errores del negocio a códigos HTTP, en un solo lugar
 @app.exception_handler(NoEncontradoError)
