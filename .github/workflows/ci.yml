@@ -1,0 +1,61 @@
+name: CI
+
+# Cuándo se ejecuta: en cada push a main y en cada pull request
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ---------- Job 1: backend ----------
+  backend:
+    runs-on: ubuntu-latest          # máquina Linux limpia que presta GitHub
+
+    # Contenedor de PostgreSQL para las pruebas (como en tu docker-compose)
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: stockflow
+          POSTGRES_PASSWORD: stockflow_ci
+          POSTGRES_DB: stockflow_test   # la base de datos que usan las pruebas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # Variables que lee app/database.py (en tu PC vienen del .env)
+    env:
+      POSTGRES_USER: stockflow
+      POSTGRES_PASSWORD: stockflow_ci
+      POSTGRES_DB: stockflow
+      POSTGRES_HOST: localhost
+
+    steps:
+      - uses: actions/checkout@v4          # descarga tu código
+      - uses: actions/setup-python@v5      # instala Python
+        with:
+          python-version: "3.14"
+          cache: pip                       # reutiliza descargas entre ejecuciones
+      - run: pip install -r requirements.txt
+      - run: pytest -v
+
+  # ---------- Job 2: frontend ----------
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend        # todos los comandos dentro de /frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint                  # ESLint
+      - run: npm run build                 # revisa los tipos de TypeScript y compila
