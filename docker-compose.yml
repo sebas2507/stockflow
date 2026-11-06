@@ -1,15 +1,41 @@
 services:
   db:
-    image: postgres:17                # imagen oficial de PostgreSQL, versión 17
-    container_name: stockflow-db      # nombre fijo para referirnos al contenedor
-    environment:                      # variables que la imagen usa para configurarse
-      POSTGRES_USER: ${POSTGRES_USER}         # ${...} se lee del archivo .env
+    image: postgres:17
+    container_name: stockflow-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"                   # puerto de tu PC : puerto del contenedor
+      - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data   # los datos se guardan en el volumen
+      - pgdata:/var/lib/postgresql/data
+    # Healthcheck: le pregunta a PostgreSQL si ya acepta conexiones
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .                       # usa el Dockerfile de la raíz
+    container_name: stockflow-api
+    env_file: .env                 # credenciales al EJECUTAR, no dentro de la imagen
+    environment:
+      POSTGRES_HOST: db            # el nombre del servicio funciona como dirección
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy # espera a que la BD esté LISTA, no solo encendida
+
+  frontend:
+    build: ./frontend              # usa frontend/Dockerfile
+    container_name: stockflow-frontend
+    ports:
+      - "5173:80"                  # Nginx escucha en el 80; lo exponemos en el 5173
+    depends_on:
+      - api
 
 volumes:
-  pgdata:                             # Docker crea y administra este volumen
+  pgdata:                      # Docker crea y administra este volumen

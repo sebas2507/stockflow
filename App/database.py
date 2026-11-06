@@ -7,9 +7,12 @@ load_dotenv()  # carga las variables de .env en el entorno
 
 # URL de conexión: driver://usuario:contraseña@host:puerto/base
 def construir_url(nombre_db: str) -> str:
+    # Si no se define POSTGRES_HOST, usa localhost (desarrollo local y pruebas)
+    host = os.getenv("POSTGRES_HOST", "localhost")
+    port = os.getenv("POSTGRES_PORT", "5432")
     return (
         f"postgresql+psycopg://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
-        f"@localhost:5432/{nombre_db}"
+        f"@{host}:{port}/{nombre_db}"
     )
 
 DATABASE_URL = construir_url(os.getenv("POSTGRES_DB"))

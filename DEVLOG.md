@@ -54,6 +54,12 @@
 - Helper genérico postJson<T> para todas las peticiones POST (DRY).
 - Promise.all + Map para unir solicitudes con productos.
 
+## Sesion 10
+- Dockerfile de la API .
+- Dockerfile multi-stage del frontend .
+- docker-compose con 3 servicios, red interna , healthcheck y depends_on.
+- Configuración por variables de entorno (POSTGRES_HOST, VITE_API_URL).
+
 
 ### Problemas encontrados
 - La terminal de Windows se "congelaba" al hacer clic sobre ella (modo selección), y eso pausaba la API. Se sale con Esc.

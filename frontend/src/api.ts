@@ -3,7 +3,8 @@ import type {
   SolicitudReabastecimiento, EstadoSolicitud,
 } from "./types";
 
-export const API_URL = "http://127.0.0.1:8000";
+// Vite reemplaza import.meta.env.VITE_API_URL al compilar; si no existe, usa la local
+export const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
 
 function mensajeDeError(data: unknown, status: number): string {
   if (data && typeof data === "object" && "detail" in data) {
