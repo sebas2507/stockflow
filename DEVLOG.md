@@ -8,3 +8,10 @@
 - Ajusté el modelo: código de barras, familia y subcategoría. El Excel original no se sube al repositorio.
 - Fase 2: API REST con FastAPI. Endpoints GET (lista, por id) y POST con validación Pydantic.
 - Filtros con query parameters (familia, estado). El estado se calcula en lugar de guardarse, a diferencia de la columna manual del Excel.
+
+## Sesión 2 
+- PostgreSQL 17 en Docker con docker-compose y volumen persistente.
+- Credenciales en .env y .env.example como plantilla.
+- Código separado en database, models, schemas, seed y main (separación de responsabilidades).
+- Relación familias → productos con llave foránea. JOIN + contains_eager para evitar N+1.
+- Seed idempotente. Los datos persisten al reiniciar la API.

@@ -1,19 +1,14 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy import select
+from sqlalchemy.orm import Session, contains_eager
+
+from app.database import get_db
+from app.models import Producto, Familia
+from app.schemas import ProductoCrear, ProductoRespuesta
 
 app = FastAPI(title="StockFlow API")
 
-# este es el esquema  de entrada: lo que el cliente debe enviar para crear un producto.
-# No incluye "id" porque lo genera el sistema, no el cliente.
-class ProductoCrear(BaseModel):
-    codigo: str | None = None          # opcional: hay productos sin código en el Excel
-    nombre: str = Field(min_length=1)  # no puede venir vacío
-    familia: str
-    subcategoria: str
-    stock: int = Field(ge=0)           # ge = "greater or equal": no se aceptan negativos
-    minimo: int = Field(ge=0)
 
-# Calcula el estado a partir de los datos, igual que la columna del Excel
 def calcular_estado(stock: int, minimo: int) -> str:
     if stock == 0:
         return "AGOTADO"
@@ -21,52 +16,59 @@ def calcular_estado(stock: int, minimo: int) -> str:
         return "STOCK BAJO"
     return "OK"
 
-productos = [
-    {"id": 1, "codigo": "7501206626610", "nombre": "Tape eléctrico negro", "familia": "ferreteria", "subcategoria": "Cintas", "stock": 20, "minimo": 10},
-    {"id": 2, "codigo": "7501206661741", "nombre": "Regleta económica", "familia": "ferreteria", "subcategoria": "Electricidad", "stock": 7, "minimo": 10},
-    {"id": 3, "codigo": "6925582176582", "nombre": "Cinta métrica 5m", "familia": "ferreteria", "subcategoria": "Herramienta", "stock": 9, "minimo": 10},
-    {"id": 4, "codigo": "6928002128871", "nombre": "Jarra cervecera", "familia": "cristaleria", "subcategoria": "Vidrio", "stock": 24, "minimo": 10},
-    {"id": 5, "codigo": "1711503448365", "nombre": "Plato melamina blanco", "familia": "cristaleria", "subcategoria": "Melamina", "stock": 0, "minimo": 10},
-    {"id": 6, "codigo": "2589637411352", "nombre": "Arnés para gato", "familia": "mascotas", "subcategoria": "Accesorios", "stock": 40, "minimo": 90},
-    {"id": 7, "codigo": "2589637410232", "nombre": "Juguete hamburguesa", "familia": "mascotas", "subcategoria": "Juguetes", "stock": 447, "minimo": 120},
-    {"id": 8, "codigo": "850009206381", "nombre": "Cable tipo C de silicón", "familia": "accesorios", "subcategoria": "Cables", "stock": 2, "minimo": 25},
-]
 
-#Para saber si la API esta viva
+# Convierte un objeto de la BD (modelo) en lo que devuelve la API (schema)
+def a_respuesta(p: Producto) -> ProductoRespuesta:
+    return ProductoRespuesta(
+        id=p.id, codigo=p.codigo, nombre=p.nombre,
+        familia=p.familia.nombre, subcategoria=p.subcategoria,
+        stock=p.stock, minimo=p.minimo,
+        estado=calcular_estado(p.stock, p.minimo),
+    )
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-# Lista productos. "familia" y "estado" son query parameters opcionales:
-@app.get("/products")
-def listar_productos(familia: str | None = None, estado: str | None = None):
-    resultado = []
-    for p in productos:
-        # Copia el producto y le agrega el estado calculado (sin modificar el original)
-        item = {**p, "estado": calcular_estado(p["stock"], p["minimo"])}
 
-        if familia and item["familia"] != familia.lower():
-            continue   # no coincide con la familia: se salta
-        if estado and item["estado"] != estado.upper():
-            continue   # no coincide con el estado: se salta
+@app.get("/products", response_model=list[ProductoRespuesta])
+def listar_productos(familia: str | None = None, estado: str | None = None,
+                     db: Session = Depends(get_db)):
+    # JOIN con familias + contains_eager: trae producto y familia en UNA sola consulta
+    consulta = (select(Producto)
+                .join(Producto.familia)
+                .options(contains_eager(Producto.familia))
+                .order_by(Producto.id))
+    if familia:
+        consulta = consulta.where(Familia.nombre == familia.lower())
 
-        resultado.append(item)
+    resultado = [a_respuesta(p) for p in db.scalars(consulta).all()]
+
+    if estado:
+        resultado = [r for r in resultado if r.estado == estado.upper()]
     return resultado
 
-# Devuelve un producto por su id. {product_id} es un "path parameter".
-@app.get("/products/{product_id}")
-def obtener_producto(product_id: int):
-    for p in productos:
-        if p["id"] == product_id:
-            return p
-    # Si no se encuentra, responde con el código 404 (Not Found).
-    raise HTTPException(status_code=404, detail="Producto no encontrado")
 
-# Crea un producto. status_code=201 significa "Created".
-@app.post("/products", status_code=201)
-def crear_producto(datos: ProductoCrear):
-    nuevo_id = max(p["id"] for p in productos) + 1   # siguiente id disponible
-    nuevo = {"id": nuevo_id, **datos.model_dump()}    # une el id con los datos recibidos
-    productos.append(nuevo)
-    return nuevo
+@app.get("/products/{product_id}", response_model=ProductoRespuesta)
+def obtener_producto(product_id: int, db: Session = Depends(get_db)):
+    producto = db.get(Producto, product_id)   # busca por llave primaria
+    if producto is None:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return a_respuesta(producto)
+
+
+@app.post("/products", response_model=ProductoRespuesta, status_code=201)
+def crear_producto(datos: ProductoCrear, db: Session = Depends(get_db)):
+    fam = db.scalar(select(Familia).where(Familia.nombre == datos.familia.lower()))
+    if fam is None:
+        raise HTTPException(status_code=422, detail=f"La familia '{datos.familia}' no existe")
+
+    producto = Producto(codigo=datos.codigo, nombre=datos.nombre, familia=fam,
+                        subcategoria=datos.subcategoria, stock=datos.stock,
+                        minimo=datos.minimo)
+    db.add(producto)
+    db.commit()            # guarda en PostgreSQL
+    db.refresh(producto)   # recarga el objeto con el id que generó la BD
+    return a_respuesta(producto)
 
