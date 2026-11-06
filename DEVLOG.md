@@ -37,6 +37,11 @@
 - Tipos en TypeScript que reflejan el schema de la API.
 - Lista de productos con useState/useEffect y estados de carga y error.
 
+## Sesion 7 - componentes
+- Filtros enviados como query parameters a la API. El estado de los filtros vive en App (lifting state up).
+- Cleanup en useEffect para descartar respuestas viejas (condición de carrera).
+- Estilos con badges de color + texto (accesibilidad).
+
 
 ### Problemas encontrados
 - La terminal de Windows se "congelaba" al hacer clic sobre ella (modo selección), y eso pausaba la API. Se sale con Esc.

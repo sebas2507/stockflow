@@ -1,59 +1,56 @@
 import { useEffect, useState } from "react";
 import type { Producto } from "./types";
+import { obtenerProductos } from "./api";
+import { Filtros } from "./components/Filtros";
+import { ProductTable } from "./components/ProductTable";
 
-const API_URL = "http://127.0.0.1:8000";
-
-// Un componente es una función que devuelve lo que se muestra en pantalla (JSX)
 function App() {
-  // Estado: datos que cambian y que, al cambiar, actualizan la pantalla
   const [productos, setProductos] = useState<Producto[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Efecto: se ejecuta UNA vez cuando el componente aparece ([] = sin dependencias)
-  useEffect(() => {
-    fetch(`${API_URL}/products`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Error ${res.status}`);
-        return res.json();
-      })
-      .then((data: Producto[]) => setProductos(data))
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setCargando(false));
-  }, []);
+  // Estado de los filtros: vive en App porque lo usan Filtros Y la consulta
+  const [familia, setFamilia] = useState("");
+  const [estado, setEstado] = useState("");
 
-  // Estados de la pantalla: cargando, error o datos
-  if (cargando) return <p>Cargando productos...</p>;
-  if (error) return <p>No se pudo conectar con la API: {error}</p>;
+  // Se ejecuta al inicio Y cada vez que cambia familia o estado
+  useEffect(() => {
+    let ignorar = false;   // evita que una respuesta vieja pise a una nueva
+
+    obtenerProductos(familia, estado)
+      .then((data) => {
+        if (!ignorar) {
+          setProductos(data);
+          setError(null);
+        }
+      })
+      .catch((err: Error) => {
+        if (!ignorar) setError(err.message);
+      })
+      .finally(() => {
+        if (!ignorar) setCargando(false);
+      });
+
+    // Limpieza: React la ejecuta antes de repetir el efecto
+    return () => {
+      ignorar = true;
+    };
+  }, [familia, estado]);
 
   return (
     <main>
       <h1>StockFlow</h1>
-      <p>{productos.length} productos</p>
+      <p className="subtitulo">Inventario y reabastecimiento</p>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Familia</th>
-            <th>Stock</th>
-            <th>Mínimo</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          {/* map convierte cada producto en una fila de la tabla */}
-          {productos.map((p) => (
-            <tr key={p.id}>
-              <td>{p.nombre}</td>
-              <td>{p.familia}</td>
-              <td>{p.stock}</td>
-              <td>{p.minimo}</td>
-              <td>{p.estado}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Filtros
+        familia={familia}
+        estado={estado}
+        onFamiliaChange={setFamilia}
+        onEstadoChange={setEstado}
+      />
+
+      {error && <p className="error">No se pudo conectar con la API: {error}</p>}
+      {cargando ? <p>Cargando productos...</p> : <ProductTable productos={productos} />}
     </main>
   );
 }
