@@ -1,0 +1,3 @@
+POSTGRES_USER=stockflow
+POSTGRES_PASSWORD=cambiar_esto
+POSTGRES_DB=stockflow
