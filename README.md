@@ -1,5 +1,7 @@
 # StockFlow
 
+![CI](https://github.com/sebas2507/stockflow/actions/workflows/ci.yml/badge.svg)
+
 Inventory management API with automated restock requests and a **human-in-the-loop approval workflow**.
 
 Built to replace a manual Excel-based inventory process at a distribution company: 214 products across 7 product families, with stock status typed by hand and no history of changes.

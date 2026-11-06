@@ -63,3 +63,4 @@
 
 ### Problemas encontrados
 - La terminal de Windows se "congelaba" al hacer clic sobre ella (modo selección), y eso pausaba la API. Se sale con Esc.
+- CI falló con "No module named 'app'": Git tenía registrada la carpeta como App/ (mayúscula). Windows no distingue mayúsculas de minúsculas, así que localmente todo funcionaba; el runner de Linux sí distingue. Se corrigió con git mv en dos pasos (App → app_temp → app).

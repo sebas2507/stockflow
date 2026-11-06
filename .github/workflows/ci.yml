@@ -35,8 +35,8 @@ jobs:
       POSTGRES_HOST: localhost
 
     steps:
-      - uses: actions/checkout@v4          # descarga tu código
-      - uses: actions/setup-python@v5      # instala Python
+      - uses: actions/checkout@v5         # descarga tu código
+      - uses: actions/setup-python@v6      # instala Python
         with:
           python-version: "3.14"
           cache: pip                       # reutiliza descargas entre ejecuciones
@@ -50,8 +50,8 @@ jobs:
       run:
         working-directory: frontend        # todos los comandos dentro de /frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
